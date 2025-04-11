@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model addresses {
+  id                                           Int       @id @default(autoincrement())
+  user_id                                      Int?
+  street                                       String    @db.VarChar(255)
+  city                                         String    @db.VarChar(100)
+  state                                        String?   @db.VarChar(100)
+  country                                      String    @db.VarChar(100)
+  postal_code                                  String    @db.VarChar(20)
+  is_default                                   Boolean?  @default(false)
+  created_at                                   DateTime? @default(now()) @db.Timestamptz(6)
+  users                                        users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  orders_orders_billing_address_idToaddresses  orders[]  @relation("orders_billing_address_idToaddresses")
+  orders_orders_shipping_address_idToaddresses orders[]  @relation("orders_shipping_address_idToaddresses")
+}
+
+model cart_items {
+  id               Int               @id @default(autoincrement())
+  cart_id          Int?
+  product_id       Int?
+  variant_id       Int?
+  quantity         Int               @default(1)
+  created_at       DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?         @default(now()) @db.Timestamptz(6)
+  carts            carts?            @relation(fields: [cart_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products         products?         @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  product_variants product_variants? @relation(fields: [variant_id], references: [id], onUpdate: NoAction)
+}
+
+model carts {
+  id         Int          @id @default(autoincrement())
+  user_id    Int?
+  created_at DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?    @default(now()) @db.Timestamptz(6)
+  cart_items cart_items[]
+  users      users?       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model categories {
+  id               Int          @id @default(autoincrement())
+  name             String       @db.VarChar(100)
+  slug             String       @unique @db.VarChar(100)
+  description      String?
+  parent_id        Int?
+  created_at       DateTime?    @default(now()) @db.Timestamptz(6)
+  categories       categories?  @relation("categoriesTocategories", fields: [parent_id], references: [id], onUpdate: NoAction)
+  other_categories categories[] @relation("categoriesTocategories")
+  products         products[]
+}
+
+model order_items {
+  id                  Int               @id @default(autoincrement())
+  order_id            Int?
+  product_id          Int?
+  variant_id          Int?
+  product_name        String            @db.VarChar(255)
+  variant_description String?           @db.VarChar(255)
+  price               Decimal           @db.Decimal(10, 2)
+  quantity            Int
+  total_price         Decimal           @db.Decimal(10, 2)
+  created_at          DateTime?         @default(now()) @db.Timestamptz(6)
+  orders              orders?           @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products            products?         @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+  product_variants    product_variants? @relation(fields: [variant_id], references: [id], onUpdate: NoAction)
+}
+
+model orders {
+  id                                              Int           @id @default(autoincrement())
+  user_id                                         Int?
+  order_number                                    String        @unique @db.VarChar(50)
+  status                                          String        @default("pending") @db.VarChar(50)
+  total_amount                                    Decimal       @db.Decimal(10, 2)
+  shipping_address_id                             Int?
+  billing_address_id                              Int?
+  payment_method                                  String        @db.VarChar(50)
+  payment_status                                  String?       @default("pending") @db.VarChar(50)
+  tracking_number                                 String?       @db.VarChar(100)
+  notes                                           String?
+  created_at                                      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?     @default(now()) @db.Timestamptz(6)
+  order_items                                     order_items[]
+  addresses_orders_billing_address_idToaddresses  addresses?    @relation("orders_billing_address_idToaddresses", fields: [billing_address_id], references: [id], onUpdate: NoAction)
+  addresses_orders_shipping_address_idToaddresses addresses?    @relation("orders_shipping_address_idToaddresses", fields: [shipping_address_id], references: [id], onUpdate: NoAction)
+  users                                           users?        @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+model product_images {
+  id         Int       @id @default(autoincrement())
+  product_id Int?
+  url        String    @db.VarChar(255)
+  alt_text   String?   @db.VarChar(255)
+  is_primary Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model product_reviews {
+  id          Int       @id @default(autoincrement())
+  product_id  Int?
+  user_id     Int?
+  rating      Int
+  comment     String?
+  is_approved Boolean?  @default(false)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  products    products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users       users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+model product_variants {
+  id               Int           @id @default(autoincrement())
+  product_id       Int?
+  name             String        @db.VarChar(100)
+  value            String        @db.VarChar(100)
+  price_adjustment Decimal?      @default(0.00) @db.Decimal(10, 2)
+  stock_quantity   Int           @default(0)
+  sku              String?       @db.VarChar(100)
+  created_at       DateTime?     @default(now()) @db.Timestamptz(6)
+  cart_items       cart_items[]
+  order_items      order_items[]
+  products         products?     @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([product_id, name, value])
+}
+
+model products {
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(255)
+  slug             String             @unique @db.VarChar(255)
+  description      String?
+  price            Decimal            @db.Decimal(10, 2)
+  discount_price   Decimal?           @db.Decimal(10, 2)
+  stock_quantity   Int                @default(0)
+  category_id      Int?
+  is_featured      Boolean?           @default(false)
+  is_active        Boolean?           @default(true)
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  cart_items       cart_items[]
+  order_items      order_items[]
+  product_images   product_images[]
+  product_reviews  product_reviews[]
+  product_variants product_variants[]
+  categories       categories?        @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+}
+
+model users {
+  id              Int               @id @default(autoincrement())
+  email           String            @unique @db.VarChar(255)
+  password_hash   String            @db.VarChar(255)
+  first_name      String?           @db.VarChar(100)
+  last_name       String?           @db.VarChar(100)
+  phone           String?           @db.VarChar(20)
+  is_admin        Boolean?          @default(false)
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  addresses       addresses[]
+  carts           carts[]
+  orders          orders[]
+  product_reviews product_reviews[]
+}
