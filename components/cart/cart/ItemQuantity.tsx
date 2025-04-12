@@ -88,7 +88,7 @@ export default function ItemQuantity({
   return (
     <div className="flex items-center space-x-2">
       <Button
-        size="sm"
+        size="md"
         id={`decrease-${item.id}`}
         onClick={() => handleDecrease(item.id)}
         aria-label={`Decrease quantity of ${item.name}`}
@@ -102,7 +102,7 @@ export default function ItemQuantity({
         autoComplete="off"
         aria-label={`Quantity of ${item.name}`}
         variant="default"
-        size="sm"
+        size="md"
         value={localQuantities[item.id] || ""}
         onChange={(e: { target: { value: string } }) =>
           handleQuantityChange(item.id, e.target.value.trim())
@@ -113,7 +113,7 @@ export default function ItemQuantity({
         }
       />
       <Button
-        size="sm"
+        size="md"
         id={`increase-${item.id}`}
         onClick={() => handleIncrease(item.id)}
         aria-label={`Increase quantity of ${item.name}`}

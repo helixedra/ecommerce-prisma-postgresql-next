@@ -13,7 +13,7 @@ export default function Input({
   variant?: "default" | "primary" | "secondary";
   size?: "sm" | "md" | "lg";
   className?: string;
-  id: string;
+  id?: string;
   [key: string]: any;
 }) {
   const baseStyles =

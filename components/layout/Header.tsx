@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { CartButton } from "@/components/cart/Cart";
+import { Product } from "@/types/Product.type";
 
 export default function Header() {
   return (
@@ -14,16 +15,10 @@ export default function Header() {
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link
-            href="/"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Home
-          </Link>
-          <Link
             href="/products"
             className="text-sm font-medium hover:underline underline-offset-4"
           >
-            Shop
+            Products
           </Link>
           <Link
             href="/about"

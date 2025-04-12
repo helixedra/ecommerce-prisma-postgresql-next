@@ -13,7 +13,7 @@ export default function ItemRemove({
   return (
     <>
       <Button
-        size="sm"
+        size="md"
         variant="ghost"
         onClick={() => removeFromCart(id)}
         className="px-3 py-1"
