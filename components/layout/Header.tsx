@@ -1,12 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { RiShoppingBagFill } from "react-icons/ri";
-import Button from "@/components/shared/Button";
-import { CartIndicator } from "../cart/Cart";
+import { CartButton } from "@/components/cart/Cart";
 
 export default function Header() {
   return (
-    <header className="">
+    <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
       <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between h-18">
         <Link
           href="/"
@@ -35,12 +33,7 @@ export default function Header() {
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          <Link href="/cart">
-            <Button variant="secondary" size="md" className="relative">
-              <RiShoppingBagFill />
-              <CartIndicator />
-            </Button>
-          </Link>
+          <CartButton />
         </div>
       </div>
     </header>

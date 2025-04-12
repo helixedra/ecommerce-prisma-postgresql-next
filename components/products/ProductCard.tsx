@@ -5,7 +5,7 @@ import AddToCartButton from "../cart/AddToCartButton";
 
 export default function ProductCard({ product }: { product: any }) {
   return (
-    <div className="rounded-lg bg-background transition-colors flex flex-col h-full">
+    <div className="rounded-lg bg-background transition-colors flex flex-col h-[440px] border border-zinc-100 overflow-clip hover:shadow-lg group">
       <div className="relative aspect-square overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <Image
@@ -13,7 +13,7 @@ export default function ProductCard({ product }: { product: any }) {
             alt={product.name}
             width={800}
             height={731}
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-cover transition-transform group-hover:scale-110"
           />
         </Link>
       </div>

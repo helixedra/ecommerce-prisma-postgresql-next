@@ -7,7 +7,7 @@ import Image from "next/image";
 export default function Hero() {
   return (
     <>
-      <section className="w-full min-h-[400px] lg:min-h-[600px] flex items-center justify-center bg-black/40 relative overflow-hidden rounded-xl md:p-12 lg:p-24">
+      <section className="w-full min-h-[400px] lg:min-h-[600px] flex items-center justify-center bg-black/40 relative overflow-hidden rounded-xl md:p-12 lg:p-24 mt-6">
         <Image
           src="/promo_image.jpg"
           alt="Hero Image"
