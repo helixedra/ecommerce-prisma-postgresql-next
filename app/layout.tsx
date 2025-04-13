@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import QueryProvider from "../components/QueryProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Provider as CartProvider } from "@/context/CartProvider";
+import Cart from "@/components/cart/Cart";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,17 +17,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <QueryProvider>
-        <CartProvider>
-          <body className={`antialiased`}>
-            <Header />
-            <main className="flex max-w-[1400px] px-6 mx-auto flex-col items-center justify-between">
-              {children}
-            </main>
-            <Footer />
-          </body>
-        </CartProvider>
-      </QueryProvider>
+      <CartProvider>
+        <body className={`antialiased`}>
+          <Cart />
+          <Header />
+          <main className="flex max-w-[1400px] px-6 mx-auto flex-col items-center justify-between">
+            {children}
+          </main>
+          <Footer />
+        </body>
+      </CartProvider>
     </html>
   );
 }

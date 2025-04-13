@@ -1,45 +1,42 @@
-"use client";
-import Cart from "@/components/cart/Cart";
 import Hero from "@/components/layout/Hero";
 import ProductsGrid from "@/components/layout/ProductsGrid";
 import Section from "@/components/layout/Section";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import api from "@/services/api";
+import { Product } from "@/types/Product.type";
 
-type User = {
-  id: string;
-  username: string;
-  email: string;
-};
+export default async function Home() {
+  // Fetch products from the API
+  const { data: products, error }: { data: Product[]; error?: string } =
+    await api("products", { method: "GET" });
 
-export default function Home() {
-  // const queryClient = useQueryClient();
-  const { data, isLoading, isError } = useQuery<User[]>({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const res = await fetch("/api/products");
-      if (!res.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return res.json();
-    },
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (isLoading) {
-    return <div>Loading...</div>;
+  // Handle error states
+  if (error) {
+    return <div>Error loading products: {error}</div>;
+  }
+  // Handle empty product list
+  if (products.length === 0) {
+    return <div>No products available.</div>;
   }
 
-  if (isError) {
-    return <div>Error loading users.</div>;
-  }
-  if (!data) {
-    return <div>No users found.</div>;
-  }
   return (
     <>
-      <Cart />
       <Hero />
-      <ProductsGrid products={data} />
+      <section className="py-8 md:py-12 lg:py-24">
+        <div className=" px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+                Featured Mugs
+              </h2>
+              <p className="max-w-[700px] text-muted-foreground md:text-xl">
+                Our most popular meme mugs that everyone loves.
+              </p>
+            </div>
+          </div>
+          <ProductsGrid products={products} />
+        </div>
+      </section>
+
       <Section />
     </>
   );
