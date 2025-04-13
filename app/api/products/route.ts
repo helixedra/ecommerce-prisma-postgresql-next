@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       },
     };
 
-    // Основна вибірка
+    // main query
     const products = await prisma.products.findMany({
       where,
       orderBy,
