@@ -6,15 +6,20 @@ import { Product } from "@/types/Product.type";
 
 export default async function Home() {
   // Fetch products from the API
-  const { data: products, error }: { data: Product[]; error?: string } =
-    await api("products", { method: "GET" });
+  const {
+    data: products,
+    error,
+  }: { data: { products: Product[] }; error?: string } = await api(
+    "products?page=1&pageSize=12&sort=featured",
+    { method: "GET" }
+  );
 
   // Handle error states
   if (error) {
     return <div>Error loading products: {error}</div>;
   }
   // Handle empty product list
-  if (products.length === 0) {
+  if (products.products.length === 0) {
     return <div>No products available.</div>;
   }
 
@@ -33,7 +38,7 @@ export default async function Home() {
               </p>
             </div>
           </div>
-          <ProductsGrid products={products} />
+          <ProductsGrid products={products.products} />
         </div>
       </section>
 

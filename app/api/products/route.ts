@@ -45,6 +45,7 @@ export async function GET(request: Request) {
       take,
       include: {
         product_images: true,
+        product_reviews: true,
       },
     });
 
@@ -52,13 +53,14 @@ export async function GET(request: Request) {
     const totalCount = await prisma.products.count({ where });
     const totalPages = Math.ceil(totalCount / pageSize);
 
-    // adding image to product
+    // adding image and reviews to product
     const productsWithImages = products.map((product) => ({
       ...product,
       image:
         product.product_images.length > 0
           ? product.product_images[0].url
           : null,
+      reviews: product.product_reviews,
     }));
 
     return NextResponse.json({

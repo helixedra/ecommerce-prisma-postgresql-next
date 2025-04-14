@@ -1,3 +1,5 @@
+import { Review } from "./Review.type";
+
 export type Product = {
   id: number;
   category_id: number;
@@ -12,4 +14,13 @@ export type Product = {
   slug: string;
   stock_quantity: number;
   updated_at: string;
+  product_reviews: Review[];
+  product_images: {
+    id: number;
+    product_id: number;
+    url: string;
+    alt_text: string;
+    is_primary: boolean;
+    created_at: string;
+  }[];
 };

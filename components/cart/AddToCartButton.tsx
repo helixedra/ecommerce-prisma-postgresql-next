@@ -5,7 +5,15 @@ import Button from "../shared/Button";
 import { RiShoppingCartLine } from "react-icons/ri";
 import { Product } from "@/types/Product.type";
 
-export default function AddToCartButton({ product }: { product: any }) {
+export default function AddToCartButton({
+  product,
+  size = "md",
+  label = "",
+}: {
+  product: any;
+  size?: "sm" | "md" | "lg";
+  label?: string;
+}) {
   const { addToCart, cart, toggleCart } = useCart();
 
   // Check if the product is already in the cart
@@ -33,7 +41,8 @@ export default function AddToCartButton({ product }: { product: any }) {
     <>
       <Button
         title="Add to Cart"
-        className="relative w-14"
+        className="relative min-w-14 w-fit"
+        size={size}
         onClick={handleAddToCart}
         variant={isInCart ? "secondary" : "primary"}
       >
@@ -43,6 +52,7 @@ export default function AddToCartButton({ product }: { product: any }) {
             {itemCount}
           </span>
         )}
+        {label && <span className="inline ml-4">{label}</span>}
       </Button>
     </>
   );
