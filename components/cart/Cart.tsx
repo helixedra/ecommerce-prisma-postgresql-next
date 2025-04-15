@@ -49,6 +49,7 @@ export default function Cart() {
                 cart={cart}
                 removeFromCart={removeFromCart}
                 updateQuantity={updateQuantity}
+                toggleCart={() => toggleCart()}
               />
             </div>
           </div>,

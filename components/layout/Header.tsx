@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { CartButton } from "@/components/cart/Cart";
-import { Product } from "@/types/Product.type";
+import Search from "./Search";
 
 export default function Header() {
   return (
@@ -13,6 +13,7 @@ export default function Header() {
         >
           <span>MemeMugs</span>
         </Link>
+        <Search />
         <nav className="hidden md:flex gap-6">
           <Link
             href="/products"
