@@ -12,7 +12,9 @@ import PaymentDetails from "@/components/checkout/PaymentDetails";
 export default function CheckoutPage() {
   return (
     <div>
-      <div>Checkout Page</div>
+      <div className="py-6">
+        <h1>Checkout</h1>
+      </div>
       <div className="flex flex-col items-center justify-center">
         <div className="flex gap-6 items-start">
           <div className="flex flex-col gap-4">
@@ -67,28 +69,32 @@ export function OrderSummary() {
       0
     );
   };
+  const total = calculateTotal();
   return (
     <>
-      <div className="space-y-4 border border-zinc-200 rounded-xl ">
-        <div>Order Summary</div>
-        <div className="p-6 flex justify-between items-center">
-          <div className="text-xl justify-end">
-            <div>Discount Code</div>
-            <div className="text-zinc-500 text-right">
-              <Input className="w-46" />
+      <div className="space-y-4 p-6 border border-zinc-200 rounded-xl">
+        <div>
+          <h3>Order Summary</h3>
+        </div>
+        <div className="w-full">
+          <div className="text-xl justify-end space-y-4">
+            <div className="text-zinc-500 flex gap-2 items-end mb-8">
+              <Input label="Discount code" className="w-full" />
               <Button>Apply</Button>
             </div>
-            <div>Subtotal: 1234</div>
-            <div>Shipping: 1234</div>
-            <div>Tax: 1234</div>
-            <div>Discount: 1234</div>
-            <div className="text-zinc-500 text-right">Total</div>
-            <div className="text-2xl font-bold text-zinc-900">
-              {calculateTotal().toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              })}
-            </div>
+            <SummaryItem label="Subtotal" value={total} />
+            <SummaryItem
+              label="Discount"
+              value={discountApplied ? total * 0.15 : 0}
+            />
+            <SummaryItem label="Shipping" value={0} />
+            <SummaryItem label="Tax" value={total * 0.15} />
+            <SummaryTotal
+              label="Total"
+              value={
+                total - (discountApplied ? total * 0.15 : 0) + total * 0.15
+              }
+            />
           </div>
         </div>
       </div>
@@ -98,5 +104,47 @@ export function OrderSummary() {
         </Button>
       </div>
     </>
+  );
+}
+
+export function SummaryItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}): React.JSX.Element {
+  return (
+    <div className="w-full flex text-base justify-between items-center">
+      <div>{label}</div>
+      <div>
+        {value !== undefined && value !== null
+          ? value.toLocaleString("en-US", {
+              style: "currency",
+              currency: "USD",
+            })
+          : "0"}
+      </div>
+    </div>
+  );
+}
+
+export function SummaryTotal({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}): React.JSX.Element {
+  return (
+    <div className="w-full flex justify-between items-center border-t border-zinc-200 pt-6">
+      <div className="text-2xl">Total</div>
+      <div className="text-2xl font-semibold text-zinc-900">
+        {value.toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+        })}
+      </div>
+    </div>
   );
 }

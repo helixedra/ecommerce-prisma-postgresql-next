@@ -4,7 +4,9 @@ import Input from "@/components/shared/Input";
 export default function ShippingDetails() {
   return (
     <div className="p-6 flex flex-col justify-between items-start ">
-      <div>Shipping Details</div>
+      <div>
+        <h3 className="text-lg font-semibold">Shipping Details</h3>
+      </div>
       <div className="grid grid-cols-1 w-full md:grid-cols-2 gap-8 space-y-2 mt-12">
         <Input placeholder="First Name" label="First Name" name="firstName" />
         <Input placeholder="Last Name" label="Last Name" name="lastName" />
