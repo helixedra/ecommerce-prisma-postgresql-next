@@ -19,7 +19,7 @@ export default function Button({
   const variantStyles = {
     default: "bg-zinc-200 text-zinc-800 hover:bg-zinc-300",
     primary: "bg-zinc-900 text-white hover:bg-zinc-700",
-    secondary: "border border-zinc-900 hover:text-zinc-800",
+    secondary: "border border-zinc-900/20 hover:text-zinc-800",
     ghost: "bg-transparent text-zinc-800 hover:bg-zinc-100",
   };
   const sizeStyles = {
