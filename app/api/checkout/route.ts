@@ -1,36 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { z } from "zod";
 import { orderSchema } from "@/shared/schemas/orderSchema";
-
-// const checkoutSchema = orderSchema;
-
-// const checkoutSchema = z.object({
-//   firstName: z.string().min(1),
-//   lastName: z.string().min(1),
-//   shippingAddress: z.string().min(5),
-//   city: z.string().min(2),
-//   stateProvince: z.string().min(2),
-//   zipPostalCode: z.string().min(5),
-//   country: z.string().min(2),
-//   phoneNumber: z.string().min(4),
-//   emailAddress: z.string().min(5).email(),
-//   orderTotal: z
-//     .string()
-//     .min(1)
-//     .regex(/^[0-9]+(\.[0-9]{2})?$/),
-//   paymentOption: z.enum(["credit_card", "paypal", "bank_transfer"]),
-//   cart: z.array(
-//     z.object({
-//       productId: z.number(),
-//       quantity: z.number(),
-//       price: z.number(),
-//       name: z.string(),
-//       image: z.string(),
-//     })
-//   ),
-//   userId: z.number(),
-// });
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -56,58 +26,12 @@ export async function POST(request: NextRequest) {
     cart,
     userId,
   } = result.data;
-
-  // TODO: Add logic to process the order
-  //  add to ORDERED_ITEMS, ADDRESSES, ORDERS
-
-  // console.log("Received order data:", {
-  //   firstName,
-  //   lastName,
-  //   shippingAddress,
-  //   city,
-  //   stateProvince,
-  //   zipPostalCode,
-  //   country,
-  //   phoneNumber,
-  //   emailAddress,
-  //   orderTotal,
-  //   paymentOption,
-  //   cart,
-  //   userId,
-  // });
-
-  // Received order data: {
-  //   firstName: 'Oleg',
-  //   lastName: 'Dubrovsky',
-  //   shippingAddress: 'ul. Florencii, dom 12b, kv.46',
-  //   city: 'Kiev',
-  //   stateProvince: 'Kyiv',
-  //   zipPostalCode: '02002',
-  //   country: 'Ukraine',
-  //   phoneNumber: '0936074405',
-  //   emailAddress: 'greencastle08@gmail.com',
-  //   orderTotal: '86.20',
-  //   paymentOption: 'card',
-  //   cart: [
-  //     {
-  //       id: 1,
-  //       name: 'Distracted Boyfriend Mug',
-  //       price: '19.99',
-  //       quantity: 2
-  //     },
-  //     { id: 3, name: 'This Is Fine Mug', price: '17.99', quantity: 1 },
-  //     { id: 5, name: 'Debugging Mug', price: '16.99', quantity: 1 }
-  //   ],
-  //   userId: 1
-  // }
-
-  // Add logic to process the order
-
+  ``;
   const transactionResult = await prisma.$transaction(async (tx) => {
     // Create the address
-    const address = await tx.addresses.create({
+    const address = await tx.address.create({
       data: {
-        user_id: userId,
+        user_id: String(userId),
         street: shippingAddress,
         city,
         state: stateProvince,
@@ -118,9 +42,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Create the order
-    const order = await tx.orders.create({
+    const order = await tx.order.create({
       data: {
-        user_id: userId,
+        user_id: String(userId),
         order_number: "ORD-" + Date.now(),
         status: "pending",
         total_amount: orderTotal,
@@ -134,7 +58,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create the order items
-    const orderItems = await tx.order_items.createMany({
+    const orderItems = await tx.orderItem.createMany({
       data: cart.map((item) => ({
         order_id: order.id,
         product_id: Number(item.id),

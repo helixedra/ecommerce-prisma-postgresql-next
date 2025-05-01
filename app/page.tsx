@@ -1,18 +1,19 @@
 import Hero from "@/components/layout/Hero";
 import ProductsGrid from "@/components/layout/ProductsGrid";
 import Section from "@/components/layout/Section";
-import api from "@/services/api";
 import { Product } from "@/types/Product.type";
+import axios from "axios";
+
+const URL =
+  process.env.NEXT_PUBLIC_API_URL +
+  "/products?page=1&pageSize=12&sort=featured";
 
 export default async function Home() {
   // Fetch products from the API
   const {
     data: products,
     error,
-  }: { data: { products: Product[] }; error?: string } = await api(
-    "products?page=1&pageSize=12&sort=featured",
-    { method: "GET" }
-  );
+  }: { data: { products: Product[] }; error?: string } = await axios.get(URL);
 
   // Handle error states
   if (error) {

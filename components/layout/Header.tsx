@@ -2,8 +2,14 @@ import React from "react";
 import Link from "next/link";
 import { CartButton } from "@/components/cart/Cart";
 import Search from "./Search";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-export default function Header() {
+export default async function Header() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
       <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between h-18">
@@ -29,12 +35,21 @@ export default function Header() {
           </Link>
         </nav>
         <div>
-          <Link
-            href="/login"
-            className="hidden md:flex text-sm font-medium hover:underline underline-offset-4"
-          >
-            Login
-          </Link>
+          {session ? (
+            <Link
+              href="/profile"
+              className="hidden md:flex text-sm font-medium hover:underline underline-offset-4"
+            >
+              {session.user.name}
+            </Link>
+          ) : (
+            <Link
+              href="/sign-in"
+              className="hidden md:flex text-sm font-medium hover:underline underline-offset-4"
+            >
+              Login
+            </Link>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <CartButton />

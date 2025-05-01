@@ -70,7 +70,7 @@ export async function GET(request: Request) {
       currentPage: page,
     });
   } catch (error) {
-    console.error("API error:", error);
+    console.error("API error:", (error as Error).message);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

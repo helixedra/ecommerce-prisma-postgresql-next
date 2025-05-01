@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    const product_images = await prisma.product_images.findMany({
+    const product_images = await prisma.productImage.findMany({
       where: {
         product_id: {
           in: params.range,
