@@ -40,11 +40,113 @@ export async function POST(request: NextRequest) {
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
-  //
+
+  const {
+    firstName,
+    lastName,
+    shippingAddress,
+    city,
+    stateProvince,
+    zipPostalCode,
+    country,
+    phoneNumber,
+    emailAddress,
+    orderTotal,
+    paymentOption,
+    cart,
+    userId,
+  } = result.data;
+
   // TODO: Add logic to process the order
   //  add to ORDERED_ITEMS, ADDRESSES, ORDERS
 
-  console.log("Received order data:", body);
+  // console.log("Received order data:", {
+  //   firstName,
+  //   lastName,
+  //   shippingAddress,
+  //   city,
+  //   stateProvince,
+  //   zipPostalCode,
+  //   country,
+  //   phoneNumber,
+  //   emailAddress,
+  //   orderTotal,
+  //   paymentOption,
+  //   cart,
+  //   userId,
+  // });
 
-  return NextResponse.json({ message: "Order received" });
+  // Received order data: {
+  //   firstName: 'Oleg',
+  //   lastName: 'Dubrovsky',
+  //   shippingAddress: 'ul. Florencii, dom 12b, kv.46',
+  //   city: 'Kiev',
+  //   stateProvince: 'Kyiv',
+  //   zipPostalCode: '02002',
+  //   country: 'Ukraine',
+  //   phoneNumber: '0936074405',
+  //   emailAddress: 'greencastle08@gmail.com',
+  //   orderTotal: '86.20',
+  //   paymentOption: 'card',
+  //   cart: [
+  //     {
+  //       id: 1,
+  //       name: 'Distracted Boyfriend Mug',
+  //       price: '19.99',
+  //       quantity: 2
+  //     },
+  //     { id: 3, name: 'This Is Fine Mug', price: '17.99', quantity: 1 },
+  //     { id: 5, name: 'Debugging Mug', price: '16.99', quantity: 1 }
+  //   ],
+  //   userId: 1
+  // }
+
+  // Add logic to process the order
+
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    // Create the address
+    const address = await tx.addresses.create({
+      data: {
+        user_id: userId,
+        street: shippingAddress,
+        city,
+        state: stateProvince,
+        country,
+        postal_code: zipPostalCode,
+        is_default: true,
+      },
+    });
+
+    // Create the order
+    const order = await tx.orders.create({
+      data: {
+        user_id: userId,
+        order_number: "ORD-" + Date.now(),
+        status: "pending",
+        total_amount: orderTotal,
+        shipping_address_id: address.id,
+        billing_address_id: address.id,
+        payment_method: paymentOption,
+        payment_status: "pending",
+        tracking_number: null,
+        notes: null,
+      },
+    });
+
+    // Create the order items
+    const orderItems = await tx.order_items.createMany({
+      data: cart.map((item) => ({
+        order_id: order.id,
+        product_id: Number(item.id),
+        quantity: Number(item.quantity),
+        price: Number(item.price),
+        total_price: Number(item.price) * Number(item.quantity),
+      })),
+    });
+
+    // Optionally return the created data
+    return { order, address, orderItems };
+  });
+
+  return NextResponse.json({ message: "Order received", transactionResult });
 }

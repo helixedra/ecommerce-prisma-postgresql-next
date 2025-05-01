@@ -17,7 +17,11 @@ export default function PaymentDetails({
   paymentOption: PaymentOptions;
   setPaymentOption: (option: PaymentOptions) => void;
 }) {
-  const handlePaymentOptionChange = (option: string) => {
+  const handlePaymentOptionChange = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    option: string
+  ) => {
+    event.preventDefault();
     setPaymentOption({
       card: option === "card",
       paypal: option === "paypal",
@@ -31,7 +35,9 @@ export default function PaymentDetails({
       </div> */}
       <div className="flex gap-4">
         <Button
-          onClick={() => handlePaymentOptionChange("card")}
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
+            handlePaymentOptionChange(event, "card")
+          }
           variant={paymentOption.card ? "primary" : "secondary"}
           className="flex items-center gap-2 w-full"
         >
@@ -39,7 +45,9 @@ export default function PaymentDetails({
           Card
         </Button>
         <Button
-          onClick={() => handlePaymentOptionChange("paypal")}
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
+            handlePaymentOptionChange(event, "paypal")
+          }
           variant={paymentOption.paypal ? "primary" : "secondary"}
           className="flex items-center gap-2 w-full"
         >

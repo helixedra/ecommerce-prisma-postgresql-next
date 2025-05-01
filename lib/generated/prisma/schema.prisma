@@ -62,7 +62,6 @@ model order_items {
   order_id            Int?
   product_id          Int?
   variant_id          Int?
-  product_name        String            @db.VarChar(255)
   variant_description String?           @db.VarChar(255)
   price               Decimal           @db.Decimal(10, 2)
   quantity            Int

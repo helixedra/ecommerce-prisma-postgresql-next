@@ -18,20 +18,20 @@ import {
 
 export default function CheckoutPage() {
   const userId = 1; // TODO: get user id from session
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
 
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit: SubmitHandler<FormSchema> = async (data) => {
-    // console.log(data);
-
+  const onSubmit: SubmitHandler<any> = async (data) => {
+    // Combine data and cart
     const orderDetails = {
       ...data,
       cart,
@@ -39,10 +39,13 @@ export default function CheckoutPage() {
     };
 
     try {
+      // Validate order
       const validatedOrder = orderSchema.parse(orderDetails);
-      // console.log("Validated order details:", validatedOrder);
+      // TODO: handle payment
       const response = await axios.post("/api/checkout", validatedOrder);
-      // console.log("Order created successfully:", response.data);
+      clearCart(); // Clear cart
+      reset(); // Reset form
+      // TODO:redirect to order confirmation page
     } catch (error) {
       console.error("Error validating order:", error);
     }
@@ -50,7 +53,7 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} method="post">
+      <form method="post" onSubmit={(e) => e.preventDefault()}>
         <div className="py-6">
           <h1>Checkout</h1>
         </div>
@@ -78,7 +81,7 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
+// Cart component
 export function Cart() {
   const { cart, removeFromCart, updateQuantity } = useCart();
   return cart.length === 0 ? (
@@ -98,6 +101,7 @@ export function Cart() {
   );
 }
 
+// Order summary component
 export function OrderSummary({
   onSubmit,
   setValue,
@@ -128,8 +132,8 @@ export function OrderSummary({
 
   const handleFormSubmit = () => {
     // Set data to react-hook-form
-    setValue("orderTotal", totalWithDiscountWithTax.toFixed(2));
-    setValue("paymentOption", paymentOption.card ? "card" : "paypal");
+    setValue("orderTotal", totalWithDiscountWithTax.toFixed(2)); // Append order total
+    setValue("paymentOption", paymentOption.card ? "card" : "paypal"); // Append payment option
     onSubmit(); // Validation + onSubmit
   };
 
@@ -173,6 +177,7 @@ export function OrderSummary({
   );
 }
 
+// Summary item component
 export function SummaryItem({
   label,
   value,
@@ -195,6 +200,7 @@ export function SummaryItem({
   );
 }
 
+// Summary total component
 export function SummaryTotal({
   label,
   value,
