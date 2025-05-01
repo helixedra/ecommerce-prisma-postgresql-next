@@ -28,6 +28,14 @@ export default function Header() {
             About
           </Link>
         </nav>
+        <div>
+          <Link
+            href="/login"
+            className="hidden md:flex text-sm font-medium hover:underline underline-offset-4"
+          >
+            Login
+          </Link>
+        </div>
         <div className="flex items-center gap-4">
           <CartButton />
         </div>

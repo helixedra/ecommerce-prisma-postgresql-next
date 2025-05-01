@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { CartItem as CartItemType, useCart } from "@/context/CartContext";
 import CartItem from "@/components/cart/CartItem";
@@ -8,111 +7,104 @@ import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
 import ShippingDetails from "@/components/checkout/ShippingDetails";
 import PaymentDetails from "@/components/checkout/PaymentDetails";
-import api from "@/services/api";
+import axios from "axios";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  FormSchema,
+  formSchema,
+  orderSchema,
+} from "@/shared/schemas/orderSchema";
 
 export default function CheckoutPage() {
-  const { cart } = useCart(); // get cart from context
-  const formSubmit = (formData: FormData) => {
-    // get form data
+  const userId = 1; // TODO: get user id from session
+  const { cart } = useCart();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit: SubmitHandler<FormSchema> = async (data) => {
+    // console.log(data);
+
     const orderDetails = {
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
-      shippingAddress: formData.get("shippingAddress"),
-      city: formData.get("city"),
-      stateProvince: formData.get("stateProvince"),
-      zipPostalCode: formData.get("zipPostalCode"),
-      country: formData.get("country"),
-      phoneNumber: formData.get("phoneNumber"),
-      emailAddress: formData.get("emailAddress"),
-      orderTotal: formData.get("orderTotal"),
-      paymentOption: formData.get("paymentOption"),
-      cart: cart,
-      userId: 1, // hardcoded for now
+      ...data,
+      cart,
+      userId,
     };
-    console.log(orderDetails); // for testing
-    // validate form data on frontend
-    validateForm(orderDetails);
-  };
 
-  const validateForm = (orderDetails: any) => {
-    // validate form data
-    // VALIDATION
-    sendDataToServer(orderDetails);
-  };
-
-  const sendDataToServer = async (orderDetails: any) => {
-    const response = await api("checkout", {
-      method: "POST",
-      body: JSON.stringify(orderDetails),
-    });
-    if (response.status === 200) {
-      console.log("Order created successfully");
-    } else {
-      console.error("Failed to create order");
+    try {
+      const validatedOrder = orderSchema.parse(orderDetails);
+      // console.log("Validated order details:", validatedOrder);
+      const response = await axios.post("/api/checkout", validatedOrder);
+      // console.log("Order created successfully:", response.data);
+    } catch (error) {
+      console.error("Error validating order:", error);
     }
   };
+
   return (
     <div>
-      <div className="py-6">
-        <h1>Checkout</h1>
-      </div>
-      <div className="flex flex-col items-center justify-center">
-        <div className="flex gap-4 items-start">
-          <div className="flex flex-col gap-4">
-            <div className="space-y-4 border border-zinc-200 rounded">
-              <Cart />
+      <form onSubmit={handleSubmit(onSubmit)} method="post">
+        <div className="py-6">
+          <h1>Checkout</h1>
+        </div>
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex gap-4 items-start">
+            <div className="flex flex-col gap-4">
+              <div className="space-y-4 border border-zinc-200 rounded">
+                <Cart />
+              </div>
+              <div className="space-y-4 border border-zinc-200 rounded">
+                <ShippingDetails register={register} errors={errors} />
+                <input type="hidden" {...register("orderTotal")} />
+                <input type="hidden" {...register("paymentOption")} />
+              </div>
             </div>
-            <div className="space-y-4 border border-zinc-200 rounded">
-              <form action={formSubmit} id="checkout-form">
-                <ShippingDetails />
-                <input
-                  type="hidden"
-                  name="orderTotal"
-                  id="orderTotal"
-                  value=""
-                />
-                <input
-                  type="hidden"
-                  name="paymentOption"
-                  id="paymentOption"
-                  value=""
-                />
-              </form>
+            <div className="w-1/3 sticky top-24">
+              <OrderSummary
+                onSubmit={handleSubmit(onSubmit)}
+                setValue={setValue}
+              />
             </div>
-          </div>
-          <div className="w-1/3 sticky top-24">
-            <OrderSummary />
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
 
 export function Cart() {
   const { cart, removeFromCart, updateQuantity } = useCart();
-  return (
+  return cart.length === 0 ? (
+    <EmptyState />
+  ) : (
     <>
-      {cart.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <>
-          {cart.map((item) => (
-            <CartItem
-              key={item.id}
-              item={item}
-              removeFromCart={removeFromCart}
-              updateQuantity={updateQuantity}
-              cart={cart}
-            />
-          ))}
-        </>
-      )}
+      {cart.map((item) => (
+        <CartItem
+          key={item.id}
+          item={item}
+          removeFromCart={removeFromCart}
+          updateQuantity={updateQuantity}
+          cart={cart}
+        />
+      ))}
     </>
   );
 }
 
-export function OrderSummary() {
+export function OrderSummary({
+  onSubmit,
+  setValue,
+}: {
+  onSubmit: () => void;
+  setValue: (name: keyof FormSchema, value: any) => void;
+}) {
   const [discountApplied, setDiscountApplied] = React.useState(false);
   const [paymentOption, setPaymentOption] = React.useState({
     card: true,
@@ -120,49 +112,25 @@ export function OrderSummary() {
   });
   const discountRef = React.useRef<HTMLInputElement>(null);
   const { cart } = useCart();
-  const calculateTotal = () => {
-    return cart.reduce(
-      (total, item) => total + Number(item.price) * item.quantity,
-      0
-    );
-  };
-  const handleDiscount = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const discountCode = discountRef.current?.value;
-    if (discountCode === "SALE") {
-      setDiscountApplied(true);
-    } else {
-      setDiscountApplied(false);
-    }
-  };
-  const total = calculateTotal();
-  const totalWithDiscountWithTax =
-    total - (discountApplied ? total * 0.15 : 0) + total * 0.15;
 
-  const handleSubmit = () => {
-    // get orderTotalInput and paymentOptionInput
-    const orderTotalInput = document.getElementById(
-      "orderTotal"
-    ) as HTMLInputElement;
-    const paymentOptionInput = document.getElementById(
-      "paymentOption"
-    ) as HTMLInputElement;
-    // get the form
-    const form = document.getElementById("checkout-form") as HTMLFormElement;
-    // Set the order total and payment option values
-    if (orderTotalInput) {
-      orderTotalInput.value = totalWithDiscountWithTax
-        .toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD",
-        })
-        .replace("$", "");
-    }
-    // not flexible for now
-    if (paymentOptionInput) {
-      paymentOptionInput.value = paymentOption.card ? "card" : "paypal";
-    }
-    // Submit the form
-    form.requestSubmit();
+  const total = cart.reduce(
+    (total, item) => total + Number(item.price) * item.quantity,
+    0
+  );
+  const discount = discountApplied ? total * 0.15 : 0;
+  const tax = total * 0.15;
+  const totalWithDiscountWithTax = total - discount + tax;
+
+  const handleDiscount = () => {
+    const code = discountRef.current?.value;
+    setDiscountApplied(code === "SALE");
+  };
+
+  const handleFormSubmit = () => {
+    // Set data to react-hook-form
+    setValue("orderTotal", totalWithDiscountWithTax.toFixed(2));
+    setValue("paymentOption", paymentOption.card ? "card" : "paypal");
+    onSubmit(); // Validation + onSubmit
   };
 
   return (
@@ -171,27 +139,18 @@ export function OrderSummary() {
         <div className="font-semibold mb-8">
           <h3>Order Summary</h3>
         </div>
-        <div className="w-full">
-          <div className="text-xl justify-end space-y-4">
-            <div className="text-zinc-500 flex gap-2 items-end mb-8">
-              <Input
-                label="Discount code"
-                className="w-full"
-                ref={discountRef}
-              />
-              <Button onClick={handleDiscount} className="w-1/3">
-                Apply
-              </Button>
-            </div>
-            <SummaryItem label="Subtotal" value={total} />
-            <SummaryItem
-              label="Discount"
-              value={discountApplied ? total * 0.15 : 0}
-            />
-            <SummaryItem label="Shipping" value={0} />
-            <SummaryItem label="Tax" value={total * 0.15} />
-            <SummaryTotal label="Total" value={totalWithDiscountWithTax} />
+        <div className="w-full text-xl space-y-4">
+          <div className="text-zinc-500 flex gap-2 items-end mb-8">
+            <Input label="Discount code" className="w-full" ref={discountRef} />
+            <Button onClick={handleDiscount} className="w-1/3">
+              Apply
+            </Button>
           </div>
+          <SummaryItem label="Subtotal" value={total} />
+          <SummaryItem label="Discount" value={discount} />
+          <SummaryItem label="Shipping" value={0} />
+          <SummaryItem label="Tax" value={tax} />
+          <SummaryTotal label="Total" value={totalWithDiscountWithTax} />
         </div>
       </div>
       <div className="space-y-4 border border-zinc-200 rounded">
@@ -205,8 +164,7 @@ export function OrderSummary() {
           size="lg"
           variant="primary"
           className="w-full py-8"
-          type="submit"
-          onClick={handleSubmit}
+          onClick={handleFormSubmit}
         >
           Proceed to Payment
         </Button>
@@ -221,17 +179,17 @@ export function SummaryItem({
 }: {
   label: string;
   value: string | number;
-}): React.JSX.Element {
+}) {
   return (
     <div className="w-full flex text-base justify-between items-center">
       <div>{label}</div>
       <div>
         {value !== undefined && value !== null
-          ? value.toLocaleString("en-US", {
+          ? Number(value).toLocaleString("en-US", {
               style: "currency",
               currency: "USD",
             })
-          : "0"}
+          : "$0.00"}
       </div>
     </div>
   );
@@ -243,12 +201,12 @@ export function SummaryTotal({
 }: {
   label: string;
   value: string | number;
-}): React.JSX.Element {
+}) {
   return (
     <div className="w-full flex justify-between items-center border-t-2 border-dashed border-zinc-200 pt-6">
-      <div className="text-2xl">Total</div>
+      <div className="text-2xl">{label}</div>
       <div className="text-2xl font-semibold text-zinc-900">
-        {value.toLocaleString("en-US", {
+        {Number(value).toLocaleString("en-US", {
           style: "currency",
           currency: "USD",
         })}

@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import clsx from "clsx";
 
@@ -7,6 +8,7 @@ export default function Input({
   size = "md",
   className = "",
   id,
+  error,
   ...props
 }: {
   label?: string;
@@ -14,6 +16,7 @@ export default function Input({
   size?: "sm" | "md" | "lg";
   className?: string;
   id?: string;
+  error?: string;
   [key: string]: any;
 }) {
   const baseStyles =
@@ -46,6 +49,7 @@ export default function Input({
         )}
         {...props}
       />
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
