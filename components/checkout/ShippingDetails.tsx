@@ -11,6 +11,7 @@ export default function ShippingDetails({
   register: UseFormRegister<FormSchema>;
   errors: FieldErrors<FormSchema>;
 }) {
+
   return (
     <div className="p-6 flex flex-col justify-between items-start">
       <div>

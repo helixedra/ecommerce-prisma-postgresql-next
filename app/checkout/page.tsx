@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CartItem as CartItemType, useCart } from "@/context/CartContext";
 import CartItem from "@/components/cart/CartItem";
 import EmptyState from "@/components/cart/EmptyState";
@@ -10,13 +10,34 @@ import PaymentDetails from "@/components/checkout/PaymentDetails";
 import axios from "axios";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createAuthClient } from "better-auth/react";
+import { authClient } from "@/lib/auth-client";
+import { User } from "@/lib/generated/prisma"
 import {
   FormSchema,
   formSchema,
   orderSchema,
 } from "@/shared/schemas/orderSchema";
 
+const { useSession } = createAuthClient();
+
+interface UserSession {
+  id: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string
+  email?: string;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  image?: string | null;
+}
+
+
 export default function CheckoutPage() {
+  // get user from session
+  const { data: session, isPending, error } = useSession();
+
   const userId = 1; // TODO: get user id from session
   const { cart, clearCart } = useCart();
 
@@ -29,6 +50,17 @@ export default function CheckoutPage() {
   } = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
+
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      const user = session.user as UserSession
+      reset({
+        firstName: user?.first_name || "",
+        lastName: user?.last_name || "",
+        emailAddress: user?.email || ""
+      });
+    }
+  }, [isPending, session, reset]);
 
   const onSubmit: SubmitHandler<any> = async (data) => {
     // Combine data and cart
@@ -191,9 +223,9 @@ export function SummaryItem({
       <div>
         {value !== undefined && value !== null
           ? Number(value).toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-            })
+            style: "currency",
+            currency: "USD",
+          })
           : "$0.00"}
       </div>
     </div>
